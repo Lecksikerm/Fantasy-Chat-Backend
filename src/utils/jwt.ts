@@ -1,17 +1,21 @@
-import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
+import * as jwt from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
+import { Types } from 'mongoose';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
+const accessSecret = process.env.JWT_ACCESS_SECRET as string;
+const refreshSecret = process.env.JWT_REFRESH_SECRET as string;
 
-export const signAccessToken = (userId: Types.ObjectId) => {
-    return jwt.sign({ sub: userId }, JWT_SECRET, {
-        expiresIn: "1d"
-    });
+const accessOpts: SignOptions = {
+  expiresIn: (process.env.JWT_ACCESS_SECRET_EXPIRY  || '1d') as any
+};
+const refreshOpts: SignOptions = {
+  expiresIn: (process.env.JWT_REFRESH_SECRET_EXPIRY || '7d') as any
 };
 
-export const signRefreshToken = (userId: Types.ObjectId) => {
-    return jwt.sign({ sub: userId }, JWT_REFRESH_SECRET, {
-        expiresIn: "7d"
-    });
-};
+export const signAccessToken = (userId: string | Types.ObjectId): string =>
+  jwt.sign({ userId: userId.toString() }, accessSecret, accessOpts);
+
+export const signRefreshToken = (userId: string | Types.ObjectId): string =>
+  jwt.sign({ userId: userId.toString() }, refreshSecret, refreshOpts);
+
+
