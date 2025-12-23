@@ -15,19 +15,24 @@ const messageSchema = new Schema(
         text: {
             type: String
         },
-        attachments: [
-            {
-                type: String 
-            }
-        ],
+        attachments: {
+            type: [String],
+            default: []
+        },
+
         seenBy: [
             {
                 type: Types.ObjectId,
                 ref: "User"
             }
-        ]
+        ],
+
+        deliveredAt: {
+            type: Date
+        }
     },
     { timestamps: true }
 );
 
 export const Message = model("Message", messageSchema);
+

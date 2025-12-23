@@ -1,10 +1,10 @@
 import { Server } from "socket.io";
 import http from "http";
-import * as jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { Message } from "./models/message.model";
 import { redis } from "./config/redis";
 
-interface SocketUser {
+interface SocketUserPayload {
   userId: string;
 }
 
@@ -13,16 +13,17 @@ export const initSocket = (server: http.Server) => {
     cors: { origin: "*" }
   });
 
-  
   io.use((socket, next) => {
     try {
-      const token = socket.handshake.auth.token;
-      if (!token) return next(new Error("No token"));
+      const token = socket.handshake.auth?.token;
+      if (!token) {
+        return next(new Error("No token provided"));
+      }
 
       const payload = jwt.verify(
         token,
         process.env.JWT_ACCESS_SECRET!
-      ) as SocketUser;
+      ) as SocketUserPayload;
 
       socket.data.userId = payload.userId;
       next();
@@ -32,48 +33,107 @@ export const initSocket = (server: http.Server) => {
   });
 
   io.on("connection", async (socket) => {
-    const userId = socket.data.userId;
+    const userId: string = socket.data.userId;
 
-    //  USER ONLINE
     await redis.sadd("online_users", userId);
     console.log(`🟢 User online: ${userId}`);
-
-    // Notify others
     io.emit("user-online", userId);
 
-    // Join conversation room
     socket.on("join-conversation", (conversationId: string) => {
+      console.log(`${userId} joined conversation ${conversationId}`);
       socket.join(conversationId);
     });
 
-    //  Send message
+
     socket.on(
-      "💬 send-message",
-      async ({ conversationId, text }) => {
+      "get-unread-count",
+      async ({ conversationId }: { conversationId: string }) => {
+        if (!conversationId) return;
+
+        const unreadCount = await Message.countDocuments({
+          conversationId,
+          senderId: { $ne: userId },
+          seenBy: { $ne: userId }
+        });
+
+        socket.emit("unread-count", {
+          conversationId,
+          count: unreadCount
+        });
+      }
+    );
+
+    socket.on(
+      "mark-seen",
+      async ({ conversationId }: { conversationId: string }) => {
+        if (!conversationId) return;
+
+        await Message.updateMany(
+          {
+            conversationId,
+            senderId: { $ne: userId },
+            seenBy: { $ne: userId }
+          },
+          {
+            $addToSet: { seenBy: userId }
+          }
+        );
+
+        socket.to(conversationId).emit("messages-seen", {
+          conversationId,
+          userId
+        });
+      }
+    );
+
+    socket.on(
+      "send-message",
+      async ({
+        conversationId,
+        text
+      }: {
+        conversationId: string;
+        text: string;
+      }) => {
         if (!conversationId || !text) return;
 
         const message = await Message.create({
           conversationId,
           senderId: userId,
           text,
-          attachments: []
+          attachments: [],
+          deliveredAt: new Date()
         });
 
         io.to(conversationId).emit("new-message", message);
       }
     );
 
+    socket.on(
+      "typing",
+      ({ conversationId }: { conversationId: string }) => {
+        socket.to(conversationId).emit("user-typing", { userId });
+      }
+    );
+
+    socket.on(
+      "stop-typing",
+      ({ conversationId }: { conversationId: string }) => {
+        socket.to(conversationId).emit("user-stop-typing", { userId });
+      }
+    );
+
     socket.on("disconnect", async () => {
-      //  USER OFFLINE
       await redis.srem("online_users", userId);
       console.log(`🔴 User offline: ${userId}`);
-
       io.emit("user-offline", userId);
     });
   });
 
   return io;
 };
+
+
 
 
 
