@@ -5,29 +5,74 @@ const messageSchema = new Schema(
         conversationId: {
             type: Types.ObjectId,
             ref: "Conversation",
-            required: true
+            required: true,
+            index: true
         },
+
         senderId: {
             type: Types.ObjectId,
             ref: "User",
             required: true
         },
+
         text: {
             type: String
         },
-        attachments: {
-            type: [String],
-            default: []
+
+        attachments: [
+            {
+                url: String,
+                type: {
+                    type: String, // image | file | audio
+                    required: true
+                }
+            }
+        ],
+
+        reactions: [
+            {
+                userId: {
+                    type: Types.ObjectId,
+                    ref: "User",
+                    required: true
+                },
+                emoji: {
+                    type: String,
+                    required: true
+                }
+            }
+        ],
+
+        status: {
+            type: String,
+            enum: ["sent", "delivered", "seen"],
+            default: "sent"
         },
 
-        seenBy: [
+        isEdited: {
+            type: Boolean,
+            default: false
+        },
+        editedAt: Date,
+
+        isDeleted: {
+            type: Boolean,
+            default: false
+        },
+
+        deletedFor: [
             {
                 type: Types.ObjectId,
                 ref: "User"
             }
         ],
 
-        deliveredAt: {
+        lastSeen: {
+            type: Date,
+            default: null
+        },
+
+        seenAt: {
             type: Date
         }
     },
