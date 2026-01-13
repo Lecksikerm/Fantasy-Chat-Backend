@@ -45,10 +45,10 @@ export const sendMessage = async (
     attachments: string[] = []
 ) => {
     const message = await Message.create({
-        conversationId,
-        senderId,
+        conversationId: new Types.ObjectId(conversationId),
+        senderId: new Types.ObjectId(senderId),
         text,
-        attachments
+        attachments: attachments.map(url => ({ url }))
     });
 
     await Conversation.findByIdAndUpdate(conversationId, {

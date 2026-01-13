@@ -3,8 +3,9 @@ import { Types } from "mongoose";
 import { Message } from "../models/message.model";
 import { AuthRequest } from "../middlewares/auth.middleware";
 
+
 export const getMessages = async (req: AuthRequest, res: Response) => {
-  const userId = req.userId; 
+  const userId = req.userId;
   const { conversationId } = req.params;
   const cursor = req.query.cursor as string | undefined;
   const limit = Math.min(Number(req.query.limit) || 20, 100);
@@ -32,8 +33,10 @@ export const getMessages = async (req: AuthRequest, res: Response) => {
   res.json({
     messages,
     nextCursor: messages.length
-      ? messages[messages.length - 1].createdAt
+      ? (messages[messages.length - 1] as any).createdAt
       : null
   });
 };
+
+
 

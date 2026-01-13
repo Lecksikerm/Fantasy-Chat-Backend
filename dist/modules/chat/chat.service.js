@@ -34,10 +34,10 @@ const getMessages = async (conversationId, userId) => {
 exports.getMessages = getMessages;
 const sendMessage = async (conversationId, senderId, text, attachments = []) => {
     const message = await message_model_1.Message.create({
-        conversationId,
-        senderId,
+        conversationId: new mongoose_1.Types.ObjectId(conversationId),
+        senderId: new mongoose_1.Types.ObjectId(senderId),
         text,
-        attachments
+        attachments: attachments.map(url => ({ url }))
     });
     await conversation_model_1.Conversation.findByIdAndUpdate(conversationId, {
         lastMessage: message._id
