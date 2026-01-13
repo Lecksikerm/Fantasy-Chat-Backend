@@ -1,14 +1,14 @@
-import { Response, Request} from "express";
+import { Request, Response } from "express"; 
+import { createConversation, getMessages, getUserConversations, sendMessage } from "./chat.service";
 
-import {
-    createConversation,
-    getUserConversations,
-    getMessages,
-    sendMessage
-} from "./chat.service";
+interface CreateConversationRequest extends Request {
+    body: {
+        otherUserId: string; 
+    };
+}
 
 export const createConversationCtrl = async (
-    req: Request,
+    req: CreateConversationRequest,  
     res: Response
 ) => {
     try {
@@ -21,7 +21,7 @@ export const createConversationCtrl = async (
 };
 
 export const getConversationsCtrl = async (
-    req: Request,
+    req: Request,  
     res: Response
 ) => {
     const convos = await getUserConversations(req.userId!);
@@ -29,7 +29,7 @@ export const getConversationsCtrl = async (
 };
 
 export const getMessagesCtrl = async (
-    req: Request,
+    req: Request,  
     res: Response
 ) => {
     try {
@@ -44,7 +44,7 @@ export const getMessagesCtrl = async (
 };
 
 export const sendMessageCtrl = async (
-    req: Request,
+    req: Request,  
     res: Response
 ) => {
     try {
