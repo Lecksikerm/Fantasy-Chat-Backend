@@ -16,8 +16,15 @@ const PORT = process.env.PORT || 5000;
   // Initialize Socket.IO
   initSocket(server);
 
-  server.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-  });
+  server.listen(
+    {
+      port: Number(PORT),
+      host: "0.0.0.0"
+    },
+    () => {
+      console.log(` Server running on ${PORT}`);
+    }
+  );
 })();
+
 
