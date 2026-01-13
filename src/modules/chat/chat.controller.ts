@@ -1,5 +1,5 @@
-import { Response } from "express";
-import { AuthRequest } from "../../middlewares/auth.middleware";
+import { Response, Request} from "express";
+
 import {
     createConversation,
     getUserConversations,
@@ -8,7 +8,7 @@ import {
 } from "./chat.service";
 
 export const createConversationCtrl = async (
-    req: AuthRequest,
+    req: Request,
     res: Response
 ) => {
     try {
@@ -21,7 +21,7 @@ export const createConversationCtrl = async (
 };
 
 export const getConversationsCtrl = async (
-    req: AuthRequest,
+    req: Request,
     res: Response
 ) => {
     const convos = await getUserConversations(req.userId!);
@@ -29,7 +29,7 @@ export const getConversationsCtrl = async (
 };
 
 export const getMessagesCtrl = async (
-    req: AuthRequest,
+    req: Request,
     res: Response
 ) => {
     try {
@@ -44,7 +44,7 @@ export const getMessagesCtrl = async (
 };
 
 export const sendMessageCtrl = async (
-    req: AuthRequest,
+    req: Request,
     res: Response
 ) => {
     try {

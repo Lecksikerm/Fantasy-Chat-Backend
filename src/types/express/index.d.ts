@@ -1,10 +1,13 @@
-
-import { Types } from 'mongoose';
+import { Request } from 'express';
+import multer from 'multer';
 
 declare global {
   namespace Express {
+   
     interface Request {
-      user?: { _id: Types.ObjectId };  
+      userId?: string; 
+      file?: Express.Multer.File; 
+      files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] }; // multiple files
     }
   }
 }

@@ -1,9 +1,11 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Message } from "../models/message.model";
-import { AuthRequest } from "../middlewares/auth.middleware";
 
 
+interface AuthRequest extends Request {
+  userId?: string;
+}
 export const getMessages = async (req: AuthRequest, res: Response) => {
   const userId = req.userId;
   const { conversationId } = req.params;

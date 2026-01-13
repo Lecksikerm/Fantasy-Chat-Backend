@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, RequestHandler } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
 import {
     createConversationCtrl,
@@ -9,11 +9,11 @@ import {
 
 const router = Router();
 
-router.use(authMiddleware);
+router.use(authMiddleware as RequestHandler);
 
-router.post("/conversation", createConversationCtrl);
-router.get("/conversations", getConversationsCtrl);
-router.get("/messages/:conversationId", getMessagesCtrl);
-router.post("/messages/:conversationId", sendMessageCtrl);
+router.post("/conversation", createConversationCtrl as unknown as RequestHandler);
+router.get("/conversations", getConversationsCtrl as unknown as RequestHandler);
+router.get("/messages/:conversationId", getMessagesCtrl as unknown as RequestHandler);
+router.post("/messages/:conversationId", sendMessageCtrl as unknown as RequestHandler);
 
 export default router;
